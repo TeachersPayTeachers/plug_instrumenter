@@ -8,6 +8,14 @@ defmodule PlugInstrumenter.MixProject do
       elixir: "~> 1.6",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
+
+      # docs
+      name: "PlugInstrumenter",
+      source_url: "https://github.com/TeachersPayTeachers/plug_instrumenter",
+      docs: [
+        main: "PlugInstrumenter",
+        extras: ["README.md"]
+      ],
       test_coverage: [tool: ExCoveralls],
       preferred_cli_env: [
         coveralls: :test,
@@ -32,13 +40,20 @@ defmodule PlugInstrumenter.MixProject do
     [
       {:dialyxir, "~> 0.4", only: [:dev, :test]},
       {:excoveralls, "~> 0.7", only: [:dev, :test]},
+      {:ex_doc, "~> 0.16", only: [:dev, :test], runtime: false},
       {:plug, "~> 1.0"}
     ]
   end
 
   defp aliases do
     [
-      ci: ["coveralls.html", "dialyzer", "format --check-formatted --check-equivalent"]
+      ci: [
+        "deps.get",
+        "coveralls.html",
+        "dialyzer",
+        "format --check-formatted --check-equivalent",
+        "docs"
+      ]
     ]
   end
 end
