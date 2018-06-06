@@ -11,7 +11,7 @@ defmodule PlugInstrumenter do
   Pass options to the plug like this:
 
   ```elixir
-  plug PlugInstrumenter, plug: MyPlug, opts: [at: "/"]
+  plug PlugInstrumenter, plug: MyPlug, opts: [my_opt: :cool]
   ```
 
   Metrics are passed to a configured callback, and a configurable name where
@@ -23,7 +23,18 @@ defmodule PlugInstrumenter do
   logged.
 
   Initialization can also be timed. Under the default configuration, the name
-  "myplug_init" would be logged.
+  `myplug_init` would be logged.
+
+  Here is an invocation with the default values specified:
+
+  ```elixir
+  plug PlugInstrumenter, plug: MyPlug, opts: [my_opt: :cool],
+    name: :cool_name,
+    callback: fn phase, {started_at, finished_at}, opts ->
+      IO.puts("\#{opts.name}_\#{phase}: \#{finished_at - started_at}")
+    end,
+    now: {:erlang, :monotonic_time, [:microsecond]}
+  ```
 
   """
 
