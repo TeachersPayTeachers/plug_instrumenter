@@ -37,6 +37,9 @@ defmodule Callback do
   end
 
   def now, do: :cool
+
+  def check_now(_, {:cool, :cool}, _), do: Logger.info("passed")
+  def check_now(_, times, _), do: raise("expected {:cool, :cool} but got #{inspect(times)}")
 end
 
 defmodule PlugInstrumenterTest do
@@ -108,9 +111,7 @@ defmodule PlugInstrumenterTest do
     c = conn(:get, "/")
     prev = Application.get_env(:plug_instrumenter, :callback)
 
-    Application.put_env(:plug_instrumenter, :callback, fn _, _, _ ->
-      Logger.info("passed")
-    end)
+    Application.put_env(:plug_instrumenter, :callback, {Callback, :call})
 
     on_exit(fn ->
       if prev == nil do
@@ -130,9 +131,7 @@ defmodule PlugInstrumenterTest do
     opts =
       PlugInstrumenter.init(
         plug: StubPlug,
-        callback: fn _, _, _ ->
-          Logger.info("passed")
-        end
+        callback: {Callback, :call}
       )
 
     assert capture_log(fn -> PlugInstrumenter.call(c, opts) end) =~ "passed"
@@ -144,22 +143,6 @@ defmodule PlugInstrumenterTest do
     assert capture_log(fn -> PlugInstrumenter.call(c, opts) end) =~ "passed"
   end
 
-  test "time function can be overridden" do
-    c = conn(:get, "/")
-
-    opts =
-      PlugInstrumenter.init(
-        plug: StubPlug,
-        now: {fn -> :cool end, []},
-        callback: fn
-          _, {:cool, :cool}, _ -> Logger.info("passed")
-          _, times, _ -> raise "expected {:cool, :cool} but got #{inspect(times)}"
-        end
-      )
-
-    assert capture_log(fn -> PlugInstrumenter.call(c, opts) end) =~ "passed"
-  end
-
   test "time function can be apply'ed" do
     c = conn(:get, "/")
 
@@ -167,10 +150,7 @@ defmodule PlugInstrumenterTest do
       PlugInstrumenter.init(
         plug: StubPlug,
         now: {Callback, :now, []},
-        callback: fn
-          _, {:cool, :cool}, _ -> Logger.info("passed")
-          _, times, _ -> raise "expected {:cool, :cool} but got #{inspect(times)}"
-        end
+        callback: {Callback, :check_now}
       )
 
     assert capture_log(fn -> PlugInstrumenter.call(c, opts) end) =~ "passed"

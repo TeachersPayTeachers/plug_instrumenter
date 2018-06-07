@@ -43,7 +43,7 @@ defmodule PlugInstrumenter do
 
   @type phase_t :: :init | :pre | :post
 
-  @type callback_t :: (phase_t(), {integer, integer}, opts_t() -> any)
+  @type callback_t :: {module, atom}
 
   @type opts_t :: %{
           plug: module,
@@ -70,9 +70,16 @@ defmodule PlugInstrumenter do
       |> Map.new()
       |> set_instrumenter_opts()
 
-    started_at = now(opts.now)
-    plug_opts = mod.init(plug_opts)
-    callback(opts.callback, [:init, {started_at, now(opts.now)}, opts])
+    plug_opts =
+      if init_callback?(instrumenter_opts) do
+        started_at = now(opts.now)
+        plug_opts = mod.init(plug_opts)
+        finished_at = now(opts.now)
+        callback(opts.callback, [:init, {started_at, finished_at}, opts])
+        plug_opts
+      else
+        plug_opts = mod.init(plug_opts)
+      end
 
     {opts, plug_opts}
   end
@@ -104,16 +111,31 @@ defmodule PlugInstrumenter do
     end
   end
 
+  defp init_callback?(kwopts) do
+    init_mode = Keyword.get(kwopts, :init_mode)
+
+    case Keyword.get(kwopts, :callback) do
+      nil ->
+        false
+
+      {m, f} ->
+        case init_mode do
+          :runtime -> true
+          :compile -> Module.defines?(m, {f, 3})
+          nil -> false
+        end
+    end
+  end
+
   defp callback({m, f}, a), do: apply(m, f, a)
-  defp callback(f, a), do: apply(f, a)
+  defp callback(nil, a), do: apply(&default_callback/3, a)
 
   defp now({m, f, a}), do: apply(m, f, a)
-  defp now({f, a}), do: apply(f, a)
 
   defp set_instrumenter_opts(%{plug: mod} = opts) do
     opts
     |> Map.put_new_lazy(:name, fn -> default_name(mod) end)
-    |> Map.put_new(:callback, &default_callback/3)
+    |> Map.put_new(:callback, nil)
     |> Map.put_new(:now, {:erlang, :monotonic_time, [:microsecond]})
   end
 
