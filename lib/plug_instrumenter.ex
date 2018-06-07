@@ -72,10 +72,10 @@ defmodule PlugInstrumenter do
 
     plug_opts =
       if init_callback?(instrumenter_opts) do
-        started_at = now(opts.now)
+        started_at = now(opts)
         plug_opts = mod.init(plug_opts)
-        finished_at = now(opts.now)
-        callback(opts.callback, [:init, {started_at, finished_at}, opts])
+        finished_at = now(opts)
+        callback(opts, [:init, {started_at, finished_at}, opts])
         plug_opts
       else
         plug_opts = mod.init(plug_opts)
@@ -93,9 +93,9 @@ defmodule PlugInstrumenter do
     mod = opts.plug
     before_len = length(conn.before_send)
 
-    started_at = now(opts.now)
+    started_at = now(opts)
     conn = mod.call(conn, plug_opts)
-    callback(opts.callback, [:pre, {started_at, now(opts.now)}, opts])
+    callback(opts, [:pre, {started_at, now(opts)}, opts])
 
     after_len = length(conn.before_send)
     diff = after_len - before_len
@@ -127,15 +127,14 @@ defmodule PlugInstrumenter do
     end
   end
 
-  defp callback({m, f}, a), do: apply(m, f, a)
-  defp callback(nil, a), do: apply(&default_callback/3, a)
+  defp callback(%{callback: {m, f}}, a), do: apply(m, f, a)
+  defp callback(_, a), do: apply(&default_callback/3, a)
 
-  defp now({m, f, a}), do: apply(m, f, a)
+  defp now(%{now: {m, f, a}}), do: apply(m, f, a)
 
   defp set_instrumenter_opts(%{plug: mod} = opts) do
     opts
     |> Map.put_new_lazy(:name, fn -> default_name(mod) end)
-    |> Map.put_new(:callback, nil)
     |> Map.put_new(:now, {:erlang, :monotonic_time, [:microsecond]})
   end
 
@@ -154,7 +153,7 @@ defmodule PlugInstrumenter do
   defp before_hook(opts) do
     fn conn ->
       timings = conn.private[@assign] || %{}
-      timings = Map.put(timings, opts.name, now(opts.now))
+      timings = Map.put(timings, opts.name, now(opts))
 
       put_private(conn, @assign, timings)
     end
@@ -163,7 +162,7 @@ defmodule PlugInstrumenter do
   defp after_hook(opts) do
     fn conn ->
       started_at = Map.fetch!(conn.private[@assign], opts.name)
-      callback(opts.callback, [:post, {started_at, now(opts.now)}, opts])
+      callback(opts, [:post, {started_at, now(opts)}, opts])
       conn
     end
   end

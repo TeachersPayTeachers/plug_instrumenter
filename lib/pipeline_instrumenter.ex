@@ -37,15 +37,11 @@ defmodule PipelineInstrumenter do
         if m in Keyword.get(builder_opts, :exclude, []) do
           plug
         else
-          opts = [plug: m, opts: plug_opts]
           callback = Keyword.get(builder_opts, :callback)
 
           opts =
-            if callback do
-              [{:callback, callback} | opts]
-            else
-              opts
-            end
+            [plug: m, opts: plug_opts]
+            |> Keyword.put_new(:callback, callback)
 
           {PlugInstrumenter, opts, val}
         end
