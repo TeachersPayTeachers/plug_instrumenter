@@ -5,7 +5,7 @@ defmodule PlugInstrumenter.MixProject do
     [
       app: :plug_instrumenter,
       version: "0.1.0",
-      elixir: "~> 1.6",
+      elixir: "~> 1.5",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
 
@@ -47,8 +47,12 @@ defmodule PlugInstrumenter.MixProject do
 
   defp aliases do
     [
-      ci: [
-        "deps.get",
+      "ci.install": [
+        "local.rebar --force",
+        "local.hex --force",
+        "deps.get"
+      ],
+      "ci.run": [
         "coveralls.html",
         "dialyzer",
         "format --check-formatted --check-equivalent",
