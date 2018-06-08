@@ -38,6 +38,7 @@ defmodule PlugInstrumenter.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
+      {:benchee, "~> 0.11", only: :dev},
       {:dialyxir, "~> 0.4", only: [:dev, :test]},
       {:excoveralls, "~> 0.7", only: [:dev, :test]},
       {:ex_doc, "~> 0.16", only: [:dev, :test], runtime: false},

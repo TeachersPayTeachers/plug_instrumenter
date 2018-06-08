@@ -11,6 +11,7 @@ install:
 
 script:
     - bin/ci-run.sh
+    - bin/ci-bench.sh
 
 cache:
     directories:
