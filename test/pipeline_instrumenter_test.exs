@@ -31,6 +31,27 @@ defmodule PipelineInstrumenterTest do
     end
   end
 
+  defmodule ErroringPlug do
+    import Plug.Conn
+
+    def init(opts), do: opts
+
+    def call(conn, _opts) do
+      raise "cool exception"
+      conn
+    end
+  end
+
+  defmodule ErroringInitPlug do
+    import Plug.Conn
+
+    def init(opts), do: raise("cool exception")
+
+    def call(conn, _opts) do
+      conn
+    end
+  end
+
   defmodule StubPipeline do
     use PipelineInstrumenter
 
@@ -60,6 +81,12 @@ defmodule PipelineInstrumenterTest do
 
     plug(SetterPlug, nice: :cool, iknow: :right)
     plug(StubPlug)
+  end
+
+  defmodule CrashingPipeline do
+    use PipelineInstrumenter
+
+    plug(ErroringPlug)
   end
 
   def event(event, _, opts) do
@@ -95,5 +122,17 @@ defmodule PipelineInstrumenterTest do
 
     assert log =~ "setter_plug: pre"
     refute log =~ "stub_plug: pre"
+  end
+
+  test "exceptions in inner plug.call points at the inner plug" do
+    c = conn(:get, "/")
+
+    try do
+      CrashingPipeline.call(c, [])
+    rescue
+      _e ->
+        st = System.stacktrace()
+        assert {PipelineInstrumenterTest.ErroringPlug, :call, 2, _} = hd(st)
+    end
   end
 end

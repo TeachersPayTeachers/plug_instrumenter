@@ -29,6 +29,23 @@ defmodule StubPlug do
   end
 end
 
+defmodule ErroringPlug do
+  import Plug.Conn
+
+  def init(opts) do
+    if Keyword.get(opts, :crash) do
+      raise "cool exception"
+    end
+
+    opts
+  end
+
+  def call(conn, _opts) do
+    raise "cool exception"
+    conn
+  end
+end
+
 defmodule Callback do
   require Logger
 
@@ -154,6 +171,29 @@ defmodule PlugInstrumenterTest do
       )
 
     assert capture_log(fn -> PlugInstrumenter.call(c, opts) end) =~ "passed"
+  end
+
+  test "instrumented plug.init exceptions don't point at instrumenter" do
+    try do
+      PlugInstrumenter.init(plug: ErroringPlug, opts: [crash: true])
+    rescue
+      _e ->
+        st = System.stacktrace()
+        assert {ErroringPlug, :init, 1, _} = hd(st)
+    end
+  end
+
+  test "instrumented plug.call exceptions don't point at instrumenter" do
+    c = conn(:get, "/")
+    opts = PlugInstrumenter.init(plug: ErroringPlug)
+
+    try do
+      PlugInstrumenter.call(c, opts)
+    rescue
+      _e ->
+        st = System.stacktrace()
+        assert {ErroringPlug, :call, 2, _} = hd(st)
+    end
   end
 
   defp execute_before_sends(c) do
