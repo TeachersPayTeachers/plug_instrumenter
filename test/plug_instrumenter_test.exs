@@ -74,6 +74,13 @@ defmodule PlugInstrumenterTest do
     refute Keyword.has_key?(plug_opts, :plug)
   end
 
+  test "name option can be an arity 2 function" do
+    {opts, _plug_opts} = PlugInstrumenter.init(plug: StubPlug, name: fn _mod, _opts ->
+      "cool"
+    end)
+    assert opts.name == "cool"
+  end
+
   test "complains if no :plug option is set" do
     assert_raise(UndefinedFunctionError, fn ->
       PlugInstrumenter.init()

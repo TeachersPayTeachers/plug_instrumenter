@@ -133,9 +133,18 @@ defmodule PlugInstrumenter do
   defp now(%{now: {m, f, a}}), do: apply(m, f, a)
 
   defp set_instrumenter_opts(%{plug: mod} = opts) do
-    opts
-    |> Map.put_new_lazy(:name, fn -> default_name(mod) end)
-    |> Map.put_new(:now, {:erlang, :monotonic_time, [:microsecond]})
+    set_opts =
+      opts
+      |> Map.put_new_lazy(:name, fn -> default_name(mod) end)
+      |> Map.put_new(:now, {:erlang, :monotonic_time, [:microsecond]})
+
+    name =
+      case Map.fetch!(set_opts, :name) do
+        fun when is_function(fun, 2) -> fun.(mod, opts)
+        name -> name
+      end
+
+    Map.put(set_opts, :name, name)
   end
 
   defp default_name(mod) do

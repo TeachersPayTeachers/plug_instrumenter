@@ -1,6 +1,8 @@
 defmodule PipelineInstrumenter do
   @moduledoc """
+  Instruments a plug pipeline using `PlugInstrumenter`.
 
+  # TODO howto do this with phoenix
   """
 
   @doc false

@@ -45,7 +45,7 @@ defmodule PipelineInstrumenterTest do
   defmodule ErroringInitPlug do
     import Plug.Conn
 
-    def init(opts), do: raise("cool exception")
+    def init(_opts), do: raise("cool exception")
 
     def call(conn, _opts) do
       conn
