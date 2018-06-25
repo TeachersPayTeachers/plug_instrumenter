@@ -27,6 +27,10 @@ defmodule StubPlug do
       |> put_private(:stubplug_after, num_after_called + 1)
     end
   end
+
+  def name(_mod, _opts) do
+    "cool"
+  end
 end
 
 defmodule ErroringPlug do
@@ -75,9 +79,19 @@ defmodule PlugInstrumenterTest do
   end
 
   test "name option can be an arity 2 function" do
-    {opts, _plug_opts} = PlugInstrumenter.init(plug: StubPlug, name: fn _mod, _opts ->
-      "cool"
-    end)
+    {opts, _plug_opts} =
+      PlugInstrumenter.init(
+        plug: StubPlug,
+        name: fn _mod, _opts ->
+          "cool"
+        end
+      )
+
+    assert opts.name == "cool"
+  end
+
+  test "name option can be an mf" do
+    {opts, _plug_opts} = PlugInstrumenter.init(plug: StubPlug, name: {StubPlug, :name})
     assert opts.name == "cool"
   end
 
