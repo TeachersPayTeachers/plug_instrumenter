@@ -21,9 +21,9 @@ defmodule PipelineInstrumenter do
       defoverridable init: 1, call: 2
 
       import Plug.Conn
-      import Plug.Builder, only: [plug: 1, plug: 2]
+      import PipelineInstrumenter, only: [plug: 1, plug: 2]
 
-      Module.register_attribute(__MODULE__, :plugs, accumulate: true)
+      Module.register_attribute(__MODULE__, :instrumented_plugs, accumulate: true)
       @before_compile PipelineInstrumenter
     end
   end
@@ -37,7 +37,7 @@ defmodule PipelineInstrumenter do
       )
 
     plugs =
-      Module.get_attribute(env.module, :plugs)
+      Module.get_attribute(env.module, :instrumented_plugs)
       |> Enum.map(fn {m, plug_opts, val} = plug ->
         if m in Keyword.get(builder_opts, :exclude, []) do
           plug
@@ -51,6 +51,12 @@ defmodule PipelineInstrumenter do
 
     quote do
       defp plug_builder_call(unquote(conn), _), do: unquote(body)
+    end
+  end
+
+  defmacro plug(plug, opts \\ []) do
+    quote do
+      @instrumented_plugs {unquote(plug), unquote(opts), true}
     end
   end
 end
