@@ -9,7 +9,7 @@ defmodule PipelineInstrumenter do
   defmacro __using__(opts) do
     quote do
       # @behaviour Plug
-      @plug_builder_opts unquote(opts)
+      @plug_instrumenter_opts unquote(opts)
 
       def init(opts) do
         opts
@@ -34,7 +34,7 @@ defmodule PipelineInstrumenter do
     builder_opts =
       Keyword.merge(
         Application.get_all_env(:plug_instrumenter),
-        Module.get_attribute(env.module, :plug_builder_opts)
+        Module.get_attribute(env.module, :plug_instrumenter_opts)
       )
 
     plugs =
