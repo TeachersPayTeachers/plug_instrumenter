@@ -8,7 +8,7 @@ defmodule PipelineInstrumenter do
   @doc false
   defmacro __using__(opts) do
     quote do
-      @behaviour Plug
+      # @behaviour Plug
       @plug_builder_opts unquote(opts)
 
       def init(opts) do
@@ -31,7 +31,11 @@ defmodule PipelineInstrumenter do
 
   @doc false
   defmacro __before_compile__(env) do
-    builder_opts = Module.get_attribute(env.module, :plug_builder_opts)
+    builder_opts =
+      Keyword.merge(
+        Application.get_all_env(:plug_instrumenter),
+        Module.get_attribute(env.module, :plug_builder_opts)
+      )
 
     plugs =
       Module.get_attribute(env.module, :plugs)
@@ -39,17 +43,12 @@ defmodule PipelineInstrumenter do
         if m in Keyword.get(builder_opts, :exclude, []) do
           plug
         else
-          callback = Keyword.get(builder_opts, :callback)
-
-          opts =
-            [plug: m, opts: plug_opts]
-            |> Keyword.put_new(:callback, callback)
+          opts = Keyword.merge(builder_opts, [plug: m, opts: plug_opts])
 
           {PlugInstrumenter, opts, val}
         end
       end)
 
-    # IO.inspect(plugs, label: :plugs)
     {conn, body} = Plug.Builder.compile(env, plugs, builder_opts)
 
     quote do

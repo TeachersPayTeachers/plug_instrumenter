@@ -91,6 +91,9 @@ defmodule PipelineInstrumenterTest do
 
   def event(event, _, opts) do
     Logger.info("#{opts.name}: #{event}")
+    if Map.get(opts, :log_something_cool) == true do
+      Logger.info("aviator sunglasses")
+    end
   end
 
   use ExUnit.Case
@@ -134,5 +137,14 @@ defmodule PipelineInstrumenterTest do
         st = System.stacktrace()
         assert {PipelineInstrumenterTest.ErroringPlug, :call, 2, _} = hd(st)
     end
+  end
+
+  test "configuration is respected" do
+    log =
+      capture_log(fn ->
+        conn(:get, "/") |> CallbackPipeline.call([])
+      end)
+
+    assert log =~ "aviator sunglasses"
   end
 end
