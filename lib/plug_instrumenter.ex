@@ -97,10 +97,6 @@ defmodule PlugInstrumenter do
     mod = opts.plug
     before_len = length(conn.before_send)
 
-    if !function_exported?(mod, :call, 2) do
-      raise "#{mod}: function plugs are not supported"
-    end
-
     started_at = now(opts)
     conn = mod.call(conn, plug_opts)
     callback(opts, [:pre, {started_at, now(opts)}, opts])
