@@ -64,10 +64,6 @@ defmodule PlugInstrumenter do
 
     plug_opts = if opts_set?, do: plug_opts, else: []
 
-    if !function_exported?(mod, :call, 2) do
-      raise "#{mod}: function plugs are not supported"
-    end
-
     opts =
       Application.get_all_env(:plug_instrumenter)
       |> Keyword.merge(instrumenter_opts)
@@ -100,6 +96,10 @@ defmodule PlugInstrumenter do
   def call(conn, {opts, plug_opts}) do
     mod = opts.plug
     before_len = length(conn.before_send)
+
+    if !function_exported?(mod, :call, 2) do
+      raise "#{mod}: function plugs are not supported"
+    end
 
     started_at = now(opts)
     conn = mod.call(conn, plug_opts)
