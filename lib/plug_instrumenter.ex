@@ -64,6 +64,10 @@ defmodule PlugInstrumenter do
 
     plug_opts = if opts_set?, do: plug_opts, else: []
 
+    if !function_exported?(mod, :call, 2) do
+      raise "function plugs are not supported"
+    end
+
     opts =
       Application.get_all_env(:plug_instrumenter)
       |> Keyword.merge(instrumenter_opts)
@@ -71,14 +75,18 @@ defmodule PlugInstrumenter do
       |> set_instrumenter_opts()
 
     plug_opts =
-      if init_callback?(instrumenter_opts) do
-        started_at = now(opts)
-        plug_opts = mod.init(plug_opts)
-        finished_at = now(opts)
-        callback(opts, [:init, {started_at, finished_at}, opts])
-        plug_opts
+      if init_defined?(mod) do
+        if init_callback?(instrumenter_opts) do
+          started_at = now(opts)
+          plug_opts = mod.init(plug_opts)
+          finished_at = now(opts)
+          callback(opts, [:init, {started_at, finished_at}, opts])
+          plug_opts
+        else
+          mod.init(plug_opts)
+        end
       else
-        plug_opts = mod.init(plug_opts)
+        []
       end
 
     {opts, plug_opts}
@@ -110,6 +118,8 @@ defmodule PlugInstrumenter do
       conn
     end
   end
+
+  defp init_defined?(mod), do: function_exported?(mod, :init, 1)
 
   defp init_callback?(kwopts) do
     init_mode = Keyword.get(kwopts, :init_mode)
@@ -148,12 +158,16 @@ defmodule PlugInstrumenter do
     Map.put(set_opts, :name, name)
   end
 
-  defp default_name(mod) do
+  defp default_name(mod) when is_atom(mod) do
     mod
-    |> Module.split()
-    |> Enum.map(&Macro.underscore(&1))
-    |> Enum.join("_")
+    |> Atom.to_string()
+    |> case do
+      "Elixir." <> name -> String.split(name, ".") |> List.last()
+      s -> s
+    end
   end
+
+  defp default_name(mod), do: to_string(mod)
 
   defp default_callback(phase, {start, finish}, opts) do
     name = Enum.join([opts.name, phase], "_")

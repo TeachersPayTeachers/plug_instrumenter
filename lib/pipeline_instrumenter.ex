@@ -8,7 +8,6 @@ defmodule PipelineInstrumenter do
   @doc false
   defmacro __using__(opts) do
     quote do
-      # @behaviour Plug
       @plug_instrumenter_opts unquote(opts)
 
       def init(opts) do
@@ -44,7 +43,6 @@ defmodule PipelineInstrumenter do
           plug
         else
           opts = Keyword.merge(builder_opts, plug: m, opts: plug_opts)
-
           {PlugInstrumenter, opts, val}
         end
       end)

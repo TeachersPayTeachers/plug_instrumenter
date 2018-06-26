@@ -114,8 +114,8 @@ defmodule PipelineInstrumenterTest do
         conn(:get, "/") |> CallbackPipeline.call([])
       end)
 
-    assert log =~ "setter_plug: pre"
-    assert log =~ "stub_plug: pre"
+    assert log =~ "SetterPlug: pre"
+    assert log =~ "StubPlug: pre"
   end
 
   test "excludes plugs" do
@@ -124,8 +124,8 @@ defmodule PipelineInstrumenterTest do
         conn(:get, "/") |> CallbackExcludePipeline.call([])
       end)
 
-    assert log =~ "setter_plug: pre"
-    refute log =~ "stub_plug: pre"
+    assert log =~ "SetterPlug: pre"
+    refute log =~ "StubPlug: pre"
   end
 
   test "exceptions in inner plug.call points at the inner plug" do
