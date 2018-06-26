@@ -43,7 +43,7 @@ defmodule PipelineInstrumenter do
         if m in Keyword.get(builder_opts, :exclude, []) do
           plug
         else
-          opts = Keyword.merge(builder_opts, [plug: m, opts: plug_opts])
+          opts = Keyword.merge(builder_opts, plug: m, opts: plug_opts)
 
           {PlugInstrumenter, opts, val}
         end

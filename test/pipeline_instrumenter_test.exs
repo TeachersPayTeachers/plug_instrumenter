@@ -91,6 +91,7 @@ defmodule PipelineInstrumenterTest do
 
   def event(event, _, opts) do
     Logger.info("#{opts.name}: #{event}")
+
     if Map.get(opts, :log_something_cool) == true do
       Logger.info("aviator sunglasses")
     end
