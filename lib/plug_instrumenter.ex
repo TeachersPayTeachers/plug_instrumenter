@@ -65,7 +65,7 @@ defmodule PlugInstrumenter do
     plug_opts = if opts_set?, do: plug_opts, else: []
 
     if !function_exported?(mod, :call, 2) do
-      raise "function plugs are not supported"
+      raise "#{mod}: function plugs are not supported"
     end
 
     opts =
