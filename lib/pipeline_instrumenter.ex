@@ -15,6 +15,7 @@ defmodule PipelineInstrumenter do
   @doc false
   defmacro __using__(opts) do
     quote do
+      @behaviour Plug
       @plug_instrumenter_opts unquote(opts)
 
       def init(opts) do
