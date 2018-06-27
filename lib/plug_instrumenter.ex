@@ -16,14 +16,14 @@ defmodule PlugInstrumenter do
 
   Metrics are passed to a configured callback, and a configurable name where
   the default is based on the module's name. for the above example,
-  `myplug_pre` would be logged.
+  `MyPlug_pre` would be logged.
 
   If your plug registers a before_send callback, that will be timed as well,
-  and given a separate name. For the above example, `myplug_post` would be
+  and given a separate name. For the above example, `MyPlug_post` would be
   logged.
 
   Initialization can also be timed. Under the default configuration, the name
-  `myplug_init` would be logged.
+  `MyPlug_init` would be logged.
 
   Here is an invocation with the default values specified:
 
@@ -71,18 +71,14 @@ defmodule PlugInstrumenter do
       |> set_instrumenter_opts()
 
     plug_opts =
-      if init_defined?(mod) do
-        if init_callback?(instrumenter_opts) do
-          started_at = now(opts)
-          plug_opts = mod.init(plug_opts)
-          finished_at = now(opts)
-          callback(opts, [:init, {started_at, finished_at}, opts])
-          plug_opts
-        else
-          mod.init(plug_opts)
-        end
+      if init_callback?(instrumenter_opts) do
+        started_at = now(opts)
+        plug_opts = mod.init(plug_opts)
+        finished_at = now(opts)
+        callback(opts, [:init, {started_at, finished_at}, opts])
+        plug_opts
       else
-        []
+        mod.init(plug_opts)
       end
 
     {opts, plug_opts}
@@ -114,8 +110,6 @@ defmodule PlugInstrumenter do
       conn
     end
   end
-
-  defp init_defined?(mod), do: function_exported?(mod, :init, 1)
 
   defp init_callback?(kwopts) do
     init_mode = Keyword.get(kwopts, :init_mode)

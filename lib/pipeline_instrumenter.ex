@@ -2,7 +2,14 @@ defmodule PipelineInstrumenter do
   @moduledoc """
   Instruments a plug pipeline using `PlugInstrumenter`.
 
-  # TODO howto do this with phoenix
+  This module can be `use`-d in a module to build an instrumented plug
+  pipeline, similar to `Plug.Builder`.
+
+  ## Options
+
+  * `:exclude` - A list of plugs to exclude from instrumentation
+  * Additional options will be passed through to `PlugInstrumenter`
+
   """
 
   @doc false
