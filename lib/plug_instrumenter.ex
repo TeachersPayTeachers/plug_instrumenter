@@ -31,10 +31,31 @@ defmodule PlugInstrumenter do
   plug PlugInstrumenter, plug: MyPlug, opts: [my_opt: :cool],
     name: :cool_name,
     callback: fn phase, {started_at, finished_at}, opts ->
-      IO.puts("\#{opts.name}_\#{phase}: \#{finished_at - started_at}")
+      Logger.debug("\#{opts.name}_\#{phase}: \#{finished_at - started_at}")
     end,
     now: {:erlang, :monotonic_time, [:microsecond]}
   ```
+
+  ## Options
+
+  Options can be set in your configuration under the `:plug_instrumenter`
+  namespace. They will be overridden by options passed to the `plug` macro.
+
+  * `:plug` - The plug to instrument
+  * `:now` - a module/function tuple pointing to an mfa that returns the
+    current time. Default is `:erlang.monotonic_time(:microsecond)`.
+  * `:callback` - The instrumentation callback, which should have a 3-arity
+    function. The default callback calls `Logger.debug`. The arguments passed
+    to the function are as follows:
+    * `phase` - one of:
+      * `:init` - executed after the `init/1` has completed
+      * `:pre` - executed after the `call/2` method has completed
+      * `:post` - executed after before_send callbacks have completed
+    * `{start, finish}` - the start and finish time, as reported by `:now`
+    * `opts` the PlugInstrumenter options represented as a map.
+  * `:name` - a string or 2-arity function that returns the metric name as a
+    string. If a function is used, it will be called during the plug's init
+    phase.
 
   """
 
@@ -49,7 +70,7 @@ defmodule PlugInstrumenter do
           plug: module,
           name: String.t(),
           callback: callback_t,
-          now: {module, atom, [any]} | {(... -> any), [any]}
+          now: {module, atom, [any]}
         }
 
   @type plug_opts_t :: {opts_t, any}
