@@ -161,8 +161,8 @@ defmodule PlugInstrumenter do
 
     name =
       case Map.fetch!(set_opts, :name) do
-        fun when is_function(fun, 2) -> fun.(mod, opts)
-        {m, f} -> apply(m, f, [mod, opts])
+        fun when is_function(fun, 2) -> fun.(mod, set_opts)
+        {m, f} -> apply(m, f, [mod, set_opts])
         name -> name
       end
 
