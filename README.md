@@ -72,6 +72,37 @@ defmodule MyApp.Endpoint do
 end
 ```
 
+### Common usage
+
+A typical use of this library is to emit plug timings as metrics. Here is an
+example instrumentation callback to do this using
+[`Statix`](https://github.com/lexmag/statix):
+
+```elixir
+defmodule MyApp.Instrumentation do
+  require Logger
+
+  # typically Statix will be use-d in a module in your application
+  alias MyApp.Statix
+
+  def plug_timing(:init, {start, finish}, opts) do
+    Logger.info("#{opts.name} initialized in #{finish - start} microseconds")
+  end
+
+  def plug_timing(phase, {start, finish}, opts) do
+    Statix.timing("#{opts.name}.#{phase}", finish - start)
+  end
+end
+```
+
+Then, to configure `PlugInstrumenter` to use this function:
+
+```elixir
+# in config/config.exs
+config :plug_instrumenter,
+  callback: {MyApp.Instrumentation, :plug_timing}
+```
+
 ## Default Configuration
 
 The default configuration is as follows:
@@ -80,6 +111,7 @@ The default configuration is as follows:
 config :plug_instrumenter,
   callback: {PlugInstrumenter, :default_callback},
   now: {:erlang, :monotonic_time, [:microsecond]},
+  # the default name option is the last part of the plug's module name
   name: MyPlug
 ```
 
