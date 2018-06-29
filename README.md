@@ -82,5 +82,5 @@ config :plug_instrumenter,
   name: MyPlug
 ```
 
-More options are available in the
+More information is available in the
 [documentation](https://hex.pm/packages/plug_instrumenter).
