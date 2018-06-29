@@ -50,6 +50,27 @@ defmodule ErroringPlug do
   end
 end
 
+defmodule OptionPassingPlug do
+  import Plug.Conn
+
+  def init(opts) do
+    opts
+  end
+
+  def call(conn, opts) do
+    conn
+    |> put_private(:opts, opts)
+  end
+
+  def callback(_phase, _times, opts) do
+    Process.put(:plug_instrumenter_opts, opts)
+  end
+
+  def name(mod, opts) do
+    Process.put(:plug_instrumenter_name, {mod, opts})
+  end
+end
+
 defmodule Callback do
   require Logger
 
@@ -93,6 +114,25 @@ defmodule PlugInstrumenterTest do
   test "name option can be an mf" do
     {opts, _plug_opts} = PlugInstrumenter.init(plug: StubPlug, name: {StubPlug, :name})
     assert opts.name == "cool"
+  end
+
+  test "plug opts are included in callback opts" do
+    {opts, plug_opts} =
+      PlugInstrumenter.init(
+        plug: OptionPassingPlug,
+        opts: [woah: :cool],
+        name: {OptionPassingPlug, :name},
+        callback: {OptionPassingPlug, :callback}
+      )
+
+    c =
+      conn(:get, "/")
+      |> PlugInstrumenter.call({opts, plug_opts})
+
+    assert [woah: :cool] = c.private[:opts]
+    assert opts == Process.get(:plug_instrumenter_opts)
+    assert {OptionPassingPlug, name_opts} = Process.get(:plug_instrumenter_name)
+    assert name_opts[:plug_opts] == opts[:plug_opts]
   end
 
   test "complains if no :plug option is set" do

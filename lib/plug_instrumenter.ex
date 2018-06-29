@@ -4,37 +4,19 @@ defmodule PlugInstrumenter do
 
   Wraps plugs, adding instrumentation. Use it in your plug pipeline like this:
 
-  ```elixir
-  plug PlugInstrumenter, plug: MyPlug
-  ```
+      plug PlugInstrumenter, plug: MyPlug
 
   Pass options to the plug like this:
 
-  ```elixir
-  plug PlugInstrumenter, plug: MyPlug, opts: [my_opt: :cool]
-  ```
+      plug PlugInstrumenter, plug: MyPlug, opts: [my_opt: :cool]
 
   Metrics are passed to a configured callback, and a configurable name where
-  the default is based on the module's name. for the above example,
-  `MyPlug_pre` would be logged.
+  the default is based on the module's name. There are three phases that can be
+  instrumented:
 
-  If your plug registers a before_send callback, that will be timed as well,
-  and given a separate name. For the above example, `MyPlug_post` would be
-  logged.
-
-  Initialization can also be timed. Under the default configuration, the name
-  `MyPlug_init` would be logged.
-
-  Here is an invocation with the default values specified:
-
-  ```elixir
-  plug PlugInstrumenter, plug: MyPlug, opts: [my_opt: :cool],
-    name: :cool_name,
-    callback: fn phase, {started_at, finished_at}, opts ->
-      Logger.debug("\#{opts.name}_\#{phase}: \#{finished_at - started_at}")
-    end,
-    now: {:erlang, :monotonic_time, [:microsecond]}
-  ```
+  * `:pre` - when the `call/2` function is executed.
+  * `:post` - when the `before_send` callbacks are executed.
+  * `:init` - when the `init/1` function is executed.
 
   ## Options
 
@@ -55,7 +37,10 @@ defmodule PlugInstrumenter do
     * `opts` the PlugInstrumenter options represented as a map.
   * `:name` - a string or 2-arity function that returns the metric name as a
     string. If a function is used, it will be called during the plug's init
-    phase.
+    phase with the following arguments:
+      * `module` - The name of the plug module
+      * `opts` - The options passed to the plug instrumenter. The instrumented
+        plug's options are included via the key `:plug_opts`.
 
   """
 
@@ -66,14 +51,15 @@ defmodule PlugInstrumenter do
 
   @type callback_t :: {module, atom}
 
+  @type plug_opts_t :: {opts_t, any}
+
   @type opts_t :: %{
           plug: module,
           name: String.t(),
           callback: callback_t,
-          now: {module, atom, [any]}
+          now: {module, atom, [any]},
+          plug_opts: any
         }
-
-  @type plug_opts_t :: {opts_t, any}
 
   @assign :__plug_timings
 
@@ -89,6 +75,7 @@ defmodule PlugInstrumenter do
       Application.get_all_env(:plug_instrumenter)
       |> Keyword.merge(instrumenter_opts)
       |> Map.new()
+      |> Map.put(:plug_opts, plug_opts)
       |> set_instrumenter_opts()
 
     plug_opts =

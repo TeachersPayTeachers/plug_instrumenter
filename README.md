@@ -1,10 +1,19 @@
 # PlugInstrumenter
 
-A simple plug that can be used to wrap plugs with an instrumentation callback.
-There is also `PipelineInstrumenter` that can be used in a similar fashion to
-`Plug.Builder` to instrument a plug pipeline.
+[![Hex pm](http://img.shields.io/hexpm/v/plug_instrumenter.svg?style=flat)](https://hex.pm/packages/plug_instrumenter)
+[![Build Status](https://travis-ci.org/TeachersPayTeachers/plug_instrumenter.svg?branch=master)](https://travis-ci.org/TeachersPayTeachers/plug_instrumenter)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-*NOTE* `PipelineInstrumenter` does not work with function plugs at this time.
+A simple plug that can be used to wrap plugs with an instrumentation callback.
+`PipelineInstrumenter` can be used in a similar fashion to `Plug.Builder` to
+instrument a plug pipeline.
+
+Goals:
+
+- Simple
+- Flexible
+
+**NOTE**: `PipelineInstrumenter` does not work with function plugs.
 
 ## Installation
 
@@ -62,14 +71,16 @@ defmodule MyApp.Endpoint do
 end
 ```
 
-## Options
+## Default Configuration
 
-In general, you probably want a application level instrumentation callback.
-Define it in a module, and configure PlugInstrumenter to use it like so:
+The default configuration is as follows:
 
 ```elixir
 config :plug_instrumenter,
-  callback: {MyApp.PlugInstrumenter, :instrument}
+  callback: {PlugInstrumenter, :default_callback},
+  now: {:erlang, :monotonic_time, [:microsecond]},
+  name: MyPlug
 ```
 
-More options are available in the documentation.
+More options are available in the
+[documentation](https://hex.pm/packages/plug_instrumenter).
