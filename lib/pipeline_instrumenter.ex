@@ -73,6 +73,15 @@ defmodule PipelineInstrumenter do
     end
   end
 
+  @doc """
+  A macro that stores a new instrumented plug. `opts` will be passed unchanged
+  to the plug.
+
+  ## Examples
+
+      plug Plug.Logger
+
+  """
   defmacro plug(plug, opts \\ []) do
     quote do
       @instrumented_plugs {unquote(plug), unquote(opts), true}

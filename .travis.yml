@@ -13,6 +13,9 @@ script:
     - bin/ci-run.sh
     - bin/ci-bench.sh
 
+after_script:
+    - MIX_ENV=dev mix inch.report
+
 cache:
     directories:
         - deps

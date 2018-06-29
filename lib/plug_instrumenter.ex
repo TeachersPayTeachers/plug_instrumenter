@@ -54,15 +54,17 @@ defmodule PlugInstrumenter do
   @type plug_opts_t :: {opts_t, any}
 
   @type opts_t :: %{
-          plug: module,
-          name: String.t(),
-          callback: callback_t,
-          now: {module, atom, [any]},
-          plug_opts: any
+          required(:plug) => module,
+          required(:name) => String.t(),
+          optional(:callback) => callback_t(),
+          required(:now) => {module, atom, [any]},
+          required(:plug_opts) => any,
+          optional(atom) => any
         }
 
   @assign :__plug_timings
 
+  @doc false
   @spec init(Keyword.t()) :: plug_opts_t() | no_return
   def init(opts) when is_list(opts) do
     mod = Keyword.fetch!(opts, :plug)
@@ -96,6 +98,7 @@ defmodule PlugInstrumenter do
     raise "#{__MODULE__} must be initialized with a :plug option in a keyword list"
   end
 
+  @doc false
   @spec call(Plug.Conn.t(), plug_opts_t()) :: Plug.Conn.t()
   def call(conn, {opts, plug_opts}) do
     mod = opts.plug

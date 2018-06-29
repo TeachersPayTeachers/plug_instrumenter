@@ -1,6 +1,7 @@
 # PlugInstrumenter
 
 [![Hex pm](http://img.shields.io/hexpm/v/plug_instrumenter.svg?style=flat)](https://hex.pm/packages/plug_instrumenter)
+[![Inline docs](http://inch-ci.org/github/TeachersPayTeachers/plug_instrumenter.svg)](http://inch-ci.org/github/TeachersPayTeachers/plug_instrumenter)
 [![Build Status](https://travis-ci.org/TeachersPayTeachers/plug_instrumenter.svg?branch=master)](https://travis-ci.org/TeachersPayTeachers/plug_instrumenter)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
