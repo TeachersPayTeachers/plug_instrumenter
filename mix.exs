@@ -1,12 +1,15 @@
 defmodule PlugInstrumenter.MixProject do
   use Mix.Project
 
+  @version "0.1.1"
+
   def project do
     [
       app: :plug_instrumenter,
-      version: "0.1.1",
+      version: @version,
       elixir: "~> 1.5",
       start_permanent: Mix.env() == :prod,
+      package: package(),
       deps: deps(),
 
       # docs
@@ -24,6 +27,14 @@ defmodule PlugInstrumenter.MixProject do
         "coveralls.html": :test
       ],
       aliases: aliases()
+    ]
+  end
+
+  defp package do
+    [
+      description: "Instrument plugs and plug pipelines",
+      licenses: ["MIT"],
+      links: %{github: "https://github.com/TeachersPayTeachers/plug_instrumenter"},
     ]
   end
 
