@@ -34,6 +34,10 @@ defmodule PlugInstrumenter.MixProject do
     [
       description: "Instrument plugs and plug pipelines",
       licenses: ["MIT"],
+      maintainers: [
+        "Teachers Pay Teachers",
+        "Jeff Martin"
+      ],
       links: %{github: "https://github.com/TeachersPayTeachers/plug_instrumenter"}
     ]
   end
