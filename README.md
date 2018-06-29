@@ -24,7 +24,7 @@ dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:plug_instrumenter, "~> 0.1.0"}
+    {:plug_instrumenter, "~> 0.1.2"}
   ]
 end
 ```
