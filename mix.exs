@@ -7,7 +7,7 @@ defmodule PlugInstrumenter.MixProject do
     [
       app: :plug_instrumenter,
       version: @version,
-      elixir: "~> 1.5",
+      elixir: "~> 1.6",
       start_permanent: Mix.env() == :prod,
       package: package(),
       deps: deps(),
@@ -63,8 +63,8 @@ defmodule PlugInstrumenter.MixProject do
       {:benchee, "~> 0.11", only: :dev},
       {:dialyxir, "~> 1.0.0-rc.2", only: [:dev, :test]},
       {:excoveralls, "~> 0.7", only: [:dev, :test]},
-      {:ex_doc, "~> 0.16", only: [:dev, :test], runtime: false},
-      {:inch_ex, "~> 0.5", only: [:dev, :test]},
+      {:ex_doc, "~> 0.18.0", only: [:dev, :test], runtime: false},
+      {:inch_ex, "~> 1.0", only: [:dev, :test]},
       {:plug, "~> 1.0"}
     ]
   end
