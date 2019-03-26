@@ -1,5 +1,5 @@
 steps:
-  - command: "buildkite-agent pipeline upload --replace || true"
+  - command: "buildkite-agent pipeline upload --replace"
     label: ":pipeline:"
 
   - wait
