@@ -1,13 +1,8 @@
 steps:
-  - command: "buildkite-agent pipeline upload --replace"
-    label: ":pipeline:"
+  - command: "docker build -t plug_instrumenter:latest ."
+    label: build container
 
   - wait
 
-  - command: bin/ci-install.sh
-    label: install dependencies
-
-  - wait
-
-  - command: bin/ci-run.sh
+  - command: "docker run --rm plug_instrumenter:latest bin/ci-run.sh"
     label: run tests
