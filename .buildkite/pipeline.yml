@@ -1,8 +1,8 @@
 steps:
   - command: "docker build -t plug_instrumenter:latest ."
-    label: build container
+    label: ":docker: build container"
 
   - wait
 
   - command: "docker run --rm plug_instrumenter:latest bin/ci-run.sh"
-    label: run tests
+    label: ":elixir: run tests"
