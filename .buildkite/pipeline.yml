@@ -1,0 +1,13 @@
+steps:
+  - command: [[ -f ".buildkite/pipeline.yml" ]] && buildkite-agent pipeline upload --replace || true
+    label: :pipeline:
+
+  - wait
+
+  - command: bin/ci-install.sh
+    label: install dependencies
+
+  - wait
+
+  - command: bin/ci-run.sh
+    label: run tests
