@@ -1,6 +1,6 @@
 steps:
-  - command: [[ -f ".buildkite/pipeline.yml" ]] && buildkite-agent pipeline upload --replace || true
-    label: :pipeline:
+  - command: "buildkite-agent pipeline upload --replace || true"
+    label: ":pipeline:"
 
   - wait
 
