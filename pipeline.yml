@@ -1,0 +1,7 @@
+steps:
+  - command: bin/ci-install.sh
+    label: install dependencies
+
+  - command: bin/ci-run.sh
+    label: run tests
+
